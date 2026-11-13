@@ -9,9 +9,9 @@
 - هرگز کلید امضای Release (`.jks` / `.keystore`) و رمزهای آن (`STORE_PASSWORD` / `KEY_PASSWORD`) را داخل مخزن عمومی یا سورس کد ذخیره نکنید.
 - برای آپدیت‌های بعدی برنامه بدون نیاز به حذف نسخه قبلی، همان کلید امضا را در محیط امن (مانند Secrets / متغیرهای محیطی CI) نگهداری کنید.
 
-### بیلد خودکار روی GitHub (GitHub Actions)
+### بیلد و انتشار خودکار در بخش Releases گیتهاب (GitHub Actions)
 - فایل `.github/workflows/android-build.yml` در پروژه قرار داده شده است.
-- پس از Push به مخزن GitHub (از دکمه **Push to GitHub** در AI Studio)، این Workflow به‌صورت خودکار اجرا شده، فایل `libv2ray.aar` را با بررسی `SHA-256` دریافت می‌کند، تست‌های واحد را اجرا می‌نماید و فایل `app-debug.apk` را در تب **Actions** بخش **Artifacts** (با نام `CloudFrontScanner-debug-apk`) برای دانلود مستقیم آماده می‌کند.
+- پس از Push به مخزن GitHub (از دکمه **Push to GitHub** در AI Studio)، این Workflow به‌صورت خودکار اجرا شده، فایل `libv2ray.aar` را با بررسی `SHA-256` دریافت می‌کند، تست‌های واحد را اجرا می‌نماید و فایل‌های `CloudFrontScanner-v1.0.0-debug.apk` و `.sha256` را مستقیماً در بخش **Releases** مخزن (و همچنین در **Actions -> Artifacts**) منتشر می‌کند.
 
 ## ۲. استفاده از اسکن (Scan)
 1. **به‌روزرسانی رنج‌های رسمی AWS**: در بالای صفحه اسکن، آخرین وضعیت `ip-ranges.json` رسمی آمازون (`syncToken` و `createDate`) نمایش داده می‌شود. این بخش فقط رنج‌های `CLOUDFRONT` با `region=GLOBAL` را برای اسکن اصلی انتخاب می‌کند (رنج‌های `CLOUDFRONT_ORIGIN_FACING` در بخش جداگانه قابل مشاهده هستند).

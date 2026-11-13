@@ -1,11 +1,15 @@
-name: Build CloudFront Scanner APK
+name: Build & Release CloudFront Scanner APK
 
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-apk:
@@ -69,12 +73,44 @@ jobs:
       - name: Build Debug APK
         run: gradle :app:assembleDebug
 
-      - name: Compute APK SHA-256
-        run: sha256sum app/build/outputs/apk/debug/app-debug.apk
+      - name: Prepare Release Assets & Checksum
+        run: |
+          mkdir -p release-assets
+          cp app/build/outputs/apk/debug/app-debug.apk release-assets/CloudFrontScanner-v1.0.0-debug.apk
+          (cd release-assets && sha256sum CloudFrontScanner-v1.0.0-debug.apk > CloudFrontScanner-v1.0.0-debug.apk.sha256)
+          cat release-assets/CloudFrontScanner-v1.0.0-debug.apk.sha256
 
-      - name: Upload app-debug.apk artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: CloudFrontScanner-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: release-assets/CloudFrontScanner-v1.0.0-debug.apk
           retention-days: 30
+
+      - name: Publish APK to GitHub Releases
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG="${{ github.ref_name }}"
+            TITLE="CloudFront Scanner ${TAG}"
+          else
+            TAG="v1.0.0-build-${{ github.run_number }}"
+            TITLE="CloudFront Scanner v1.0.0 (Build #${{ github.run_number }})"
+          fi
+          SHA256=$(cut -d' ' -f1 release-assets/CloudFrontScanner-v1.0.0-debug.apk.sha256)
+          NOTES=$(printf "### CloudFront Scanner Android APK\n\n- **Commit:** %s\n- **File:** \`CloudFrontScanner-v1.0.0-debug.apk\`\n- **SHA-256:** \`%s\`\n- **Signing:** Debug keystore (ready for direct sideload installation)\n" "${{ github.sha }}" "$SHA256")
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" \
+              release-assets/CloudFrontScanner-v1.0.0-debug.apk \
+              release-assets/CloudFrontScanner-v1.0.0-debug.apk.sha256 \
+              --clobber
+          else
+            gh release create "$TAG" \
+              release-assets/CloudFrontScanner-v1.0.0-debug.apk \
+              release-assets/CloudFrontScanner-v1.0.0-debug.apk.sha256 \
+              --target "${{ github.sha }}" \
+              --title "$TITLE" \
+              --notes "$NOTES"
+          fi

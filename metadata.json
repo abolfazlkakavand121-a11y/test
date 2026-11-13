@@ -1,0 +1,6 @@
+{
+  "name": "CloudFront Scanner",
+  "description": "Independent Amazon CloudFront IP scanner with two-phase probing (TCP/TLS/WebSocket) and real Xray-core VLESS tunnel verification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

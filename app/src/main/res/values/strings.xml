@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CloudFront Scanner</string>
+    <string name="notification_channel_scan_name">CloudFront Scan Progress</string>
+    <string name="notification_channel_scan_desc">Shows live progress for active CloudFront IP and Xray tunnel scans</string>
+</resources>
